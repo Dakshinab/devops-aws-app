@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { s3Client, S3_BUCKET } from "@/lib/s3";
+import { AWS_REGION, S3_BUCKET, s3Client } from "@/lib/s3";
 
 export async function POST(request: NextRequest) {
   try {
+    if (!s3Client || !S3_BUCKET || !AWS_REGION) {
+      return NextResponse.json(
+        { error: "S3 is not configured yet" },
+        { status: 503 },
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get("file");
 
@@ -23,7 +30,7 @@ export async function POST(request: NextRequest) {
       }),
     );
 
-    const fileUrl = `https://${S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
+    const fileUrl = `https://${S3_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${fileName}`;
 
     return NextResponse.json({
       success: true,
