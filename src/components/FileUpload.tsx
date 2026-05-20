@@ -60,7 +60,6 @@ export default function FileUpload() {
       <h3 className="mb-4 text-sm font-semibold uppercase tracking-widest text-stone-500">
         Upload image
       </h3>
-
       <form onSubmit={handleUpload} className="space-y-4">
         <input
           type="file"
@@ -68,13 +67,11 @@ export default function FileUpload() {
           onChange={handleFileChange}
           className="block w-full text-sm text-stone-600 file:mr-4 file:rounded-full file:border-0 file:bg-stone-900 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
         />
-
         {error !== "" ? (
           <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">
             {error}
           </p>
         ) : null}
-
         <button
           type="submit"
           disabled={!file || uploading}
@@ -83,18 +80,10 @@ export default function FileUpload() {
           {uploading ? "Uploading..." : "Upload to S3"}
         </button>
       </form>
-
       {uploadedUrl !== "" ? (
         <div className="mt-4 rounded-lg bg-green-50 px-4 py-3 text-sm">
           <p className="font-medium text-green-700">Uploaded successfully!</p>
-          
-            href={uploadedUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="mt-1 block break-all text-green-600 underline"
-          >
-            {uploadedUrl}
-          </a>
+          <a href={uploadedUrl} target="_blank" rel="noreferrer" className="mt-1 block break-all text-green-600 underline">{uploadedUrl}</a>
         </div>
       ) : null}
     </div>
