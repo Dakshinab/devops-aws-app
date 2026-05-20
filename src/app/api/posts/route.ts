@@ -1,27 +1,49 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
-export async function GET() {
+function isValidUuid(id: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(id);
+}
+
+export async function GET(request: NextRequest) {
   try {
-    const posts = await prisma.post.findMany({
-      orderBy: { createdAt: "desc" },
-      include: {
-        author: {
-          select: {
-            id: true,
-            email: true,
-            name: true,
+    const { searchParams } = new URL(request.url);
+    const page = Math.max(1, parseInt(searchParams.get("page") ?? "1"));
+    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") ?? "20")));
+    const skip = (page - 1) * limit;
+
+    const [posts, total] = await Promise.all([
+      prisma.post.findMany({
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+        include: {
+          author: {
+            select: {
+              id: true,
+              email: true,
+              name: true,
+            },
           },
         },
+      }),
+      prisma.post.count(),
+    ]);
+
+    return NextResponse.json({
+      posts,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
       },
     });
-
-    return NextResponse.json(posts);
   } catch (error) {
     console.error("Posts fetch error:", error);
     return NextResponse.json(
       { error: "Failed to load posts" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
@@ -30,18 +52,36 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const title = typeof body.title === "string" ? body.title.trim() : "";
-    const content =
-      typeof body.content === "string" ? body.content.trim() : null;
-    const imageUrl =
-      typeof body.imageUrl === "string" ? body.imageUrl.trim() : null;
-    const authorId =
-      typeof body.authorId === "string" ? body.authorId.trim() : "";
+    const content = typeof body.content === "string" ? body.content.trim() : null;
+    const imageUrl = typeof body.imageUrl === "string" ? body.imageUrl.trim() : null;
+    const authorId = typeof body.authorId === "string" ? body.authorId.trim() : "";
     const published = Boolean(body.published);
 
-    if (!title || !authorId) {
+    if (!title) {
       return NextResponse.json(
-        { error: "Title and authorId are required" },
-        { status: 400 },
+        { error: "Title is required" },
+        { status: 400 }
+      );
+    }
+
+    if (title.length > 200) {
+      return NextResponse.json(
+        { error: "Title must be under 200 characters" },
+        { status: 400 }
+      );
+    }
+
+    if (!authorId) {
+      return NextResponse.json(
+        { error: "Author ID is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!isValidUuid(authorId)) {
+      return NextResponse.json(
+        { error: "Author ID is not a valid UUID" },
+        { status: 400 }
       );
     }
 
@@ -53,7 +93,7 @@ export async function POST(request: NextRequest) {
     if (!author) {
       return NextResponse.json(
         { error: "Author not found" },
-        { status: 404 },
+        { status: 404 }
       );
     }
 
@@ -72,7 +112,7 @@ export async function POST(request: NextRequest) {
     console.error("Post create error:", error);
     return NextResponse.json(
       { error: "Failed to create post" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }
