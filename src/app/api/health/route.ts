@@ -1,13 +1,22 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
 
 export async function GET() {
+  let dbStatus = "not tested";
+  let dbError = "";
+
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    dbStatus = "connected";
+  } catch (error) {
+    dbStatus = "failed";
+    dbError = error instanceof Error ? error.message : "unknown error";
+  }
+
   return NextResponse.json({
     status: "ok",
-    env: {
-      hasDatabase: !!process.env.DATABASE_URL,
-      hasRegion: !!process.env.APP_REGION,
-      hasBucket: !!process.env.APP_S3_BUCKET,
-      nodeEnv: process.env.NODE_ENV,
-    },
+    database: dbStatus,
+    error: dbError,
+    nodeEnv: process.env.NODE_ENV,
   });
 }
