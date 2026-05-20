@@ -116,7 +116,7 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <div className="overflow-hidden rounded-lg border border-stone-200 bg-white">
-              {data.recentBookings.map((booking, index) => (
+              {data.recentBookings.map((booking: typeof data.recentBookings[0], index: number) => (
                 <div
                   key={booking.id}
                   className={`flex items-center justify-between gap-4 px-6 py-4 ${
