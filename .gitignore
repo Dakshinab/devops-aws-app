@@ -42,3 +42,10 @@ next-env.d.ts
 
 # deployment
 amplify.yml
+
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/terraform.tfvars
