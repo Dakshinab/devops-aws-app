@@ -1,7 +1,7 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
 
-const databaseUrl = process.env.DATABASE_URL ?? "postgresql://postgres:StayDB2026!@serene-stay-db.c3me0aw0uxob.ap-south-1.rds.amazonaws.com:5432/devops_aws";
+const databaseUrl = process.env.DATABASE_URL ?? "postgresql://postgres:StayDB2026!@serene-stay-db.c3me0aw0uxob.ap-south-1.rds.amazonaws.com:5432/devops_aws?sslmode=require";
 
 const globalForPrisma = globalThis as typeof globalThis & {
   prisma?: PrismaClient;
@@ -10,6 +10,7 @@ const globalForPrisma = globalThis as typeof globalThis & {
 const adapter = new PrismaPg({
   connectionString: databaseUrl,
   max: 10,
+  ssl: true,
 });
 
 export const prisma =
