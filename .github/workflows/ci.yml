@@ -1,29 +1,36 @@
-name: PR CI
+name: CI
 
 on:
+  push:
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-  build:
-    name: Build and Lint
+  lint-and-typecheck:
+    name: Lint and Type Check
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Use Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: 20
+          cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint
+      - name: Generate Prisma client
+        run: npx prisma generate
+        env:
+          DATABASE_URL: postgresql://stub:stub@localhost:5432/stub
+
+      - name: Run ESLint
         run: npm run lint
 
-      - name: Build
-        run: npm run build
+      - name: Run TypeScript check
+        run: npx tsc --noEmit
