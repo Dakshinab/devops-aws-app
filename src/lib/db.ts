@@ -10,7 +10,9 @@ const globalForPrisma = globalThis as typeof globalThis & {
 const adapter = new PrismaPg({
   connectionString: databaseUrl,
   max: 10,
-  ssl: true,
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 export const prisma =
